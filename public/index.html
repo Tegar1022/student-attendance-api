@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title> Portal Akademik — Sistem Manajemen & Presensi</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <!-- Top Bar Navigation -->
+  <header class="topbar">
+    <div class="container topbar-inner">
+      <div class="brand">
+        <div class="brand-mark">SA</div>
+        <div>
+          <h1 class="brand-title">ATTENDANCE_CORE</h1>
+          <p class="brand-subtitle">Student Registry & Daily Presence Engine</p>
+        </div>
+      </div>
+      <div class="system-status">
+        <span class="status-dot" id="apiStatusDot"></span>
+        <span class="mono-label" id="apiStatusText">DB: SEKOLAH.DB // ONLINE</span>
+      </div>
+    </div>
+  </header>
+
+  <main class="container workspace">
+    <!-- Metrics Bar -->
+    <section class="metrics-grid">
+      <div class="metric-card">
+        <span class="metric-label">01 // TOTAL TERDAFTAR</span>
+        <div class="metric-value" id="statTotalStudents">0</div>
+        <span class="metric-meta">Siswa aktif di database</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">02 // LOG PRESENSI</span>
+        <div class="metric-value" id="statTotalLogs">0</div>
+        <span class="metric-meta">Total rekaman kehadiran</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">03 // RASIO KEHADIRAN</span>
+        <div class="metric-value" id="statAttendanceRate">0%</div>
+        <span class="metric-meta">Persentase status HADIR</span>
+      </div>
+      <div class="metric-card">
+        <span class="metric-label">04 // TOTAL ALFA / ABSEN</span>
+        <div class="metric-value text-danger" id="statTotalAlfa">0</div>
+        <span class="metric-meta">Akumulasi ketidakhadiran</span>
+      </div>
+    </section>
+
+    <!-- Main Content Grid -->
+    <div class="layout-grid">
+      <!-- Left Column: Forms -->
+      <aside class="sidebar-forms">
+        <!-- Panel 1: Register Student -->
+        <section class="panel">
+          <div class="panel-header">
+            <span class="panel-tag">MODULE_A</span>
+            <h2 class="panel-title">Registrasi Siswa</h2>
+          </div>
+          <form id="studentForm" class="form-stack" autocomplete="off">
+            <div class="field">
+              <label for="inputNis">Nomor Induk Siswa (NIS)</label>
+              <input type="text" id="inputNis" placeholder="mis. 1002" required />
+            </div>
+            <div class="field">
+              <label for="inputNama">Nama Lengkap</label>
+              <input type="text" id="inputNama" placeholder="Masukkan nama lengkap" required />
+            </div>
+            <div class="field">
+              <label for="inputKelas">Kelas / Jurusan</label>
+              <input type="text" id="inputKelas" placeholder="mis. XI PPLG" required />
+            </div>
+            <button type="submit" class="btn btn-primary">
+              <span>Simpan Data Siswa</span>
+              <span class="btn-kbd">ENTER</span>
+            </button>
+          </form>
+        </section>
+
+        <!-- Panel 2: Log Attendance -->
+        <section class="panel">
+          <div class="panel-header">
+            <span class="panel-tag">MODULE_B</span>
+            <h2 class="panel-title">Catat Presensi</h2>
+          </div>
+          <form id="attendanceForm" class="form-stack">
+            <div class="field">
+              <label for="selectStudent">Pilih Entitas Siswa</label>
+              <select id="selectStudent" required>
+                <option value="">-- Muat daftar siswa --</option>
+              </select>
+            </div>
+            <div class="field-row">
+              <div class="field">
+                <label for="inputDate">Tanggal</label>
+                <input type="date" id="inputDate" required />
+              </div>
+              <div class="field">
+                <label for="selectStatus">Status Kehadiran</label>
+                <select id="selectStatus" required>
+                  <option value="HADIR">HADIR</option>
+                  <option value="IZIN">IZIN</option>
+                  <option value="SAKIT">SAKIT</option>
+                  <option value="ALFA">ALFA</option>
+                </select>
+              </div>
+            </div>
+            <button type="submit" class="btn btn-secondary">
+              <span>Rekam Presensi</span>
+              <span class="btn-kbd">SUBMIT</span>
+            </button>
+          </form>
+        </section>
+      </aside>
+
+      <!-- Right Column: Data Tables -->
+      <div class="main-tables">
+        <!-- Table 1: Student Directory -->
+        <section class="panel">
+          <div class="panel-header panel-header-flex">
+            <div>
+              <span class="panel-tag">DIRECTORY // SQLITE</span>
+              <h2 class="panel-title">Direktori Siswa</h2>
+            </div>
+            <div class="toolbar">
+              <input
+                type="search"
+                id="searchStudent"
+                class="input-compact"
+                placeholder="Cari NIS, nama, atau kelas..."
+              />
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 60px;">ID</th>
+                  <th style="width: 120px;">NIS</th>
+                  <th>NAMA LENGKAP</th>
+                  <th style="width: 140px;">KELAS</th>
+                  <th style="width: 100px; text-align: right;">TINDAKAN</th>
+                </tr>
+              </thead>
+              <tbody id="studentTableBody">
+                <tr>
+                  <td colspan="5" class="empty-state">Memuat data dari server...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+
+        <!-- Table 2: Attendance Report (JOIN Query) -->
+        <section class="panel">
+          <div class="panel-header panel-header-flex">
+            <div>
+              <span class="panel-tag">RELATIONAL REPORT // JOIN</span>
+              <h2 class="panel-title">Log Riwayat Presensi</h2>
+            </div>
+            <div class="toolbar">
+              <select id="filterStatus" class="input-compact">
+                <option value="ALL">Semua Status</option>
+                <option value="HADIR">Hanya HADIR</option>
+                <option value="IZIN">Hanya IZIN</option>
+                <option value="SAKIT">Hanya SAKIT</option>
+                <option value="ALFA">Hanya ALFA</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="table-container">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th style="width: 130px;">TANGGAL</th>
+                  <th style="width: 110px;">NIS</th>
+                  <th>NAMA SISWA</th>
+                  <th style="width: 130px;">KELAS</th>
+                  <th style="width: 120px;">STATUS</th>
+                </tr>
+              </thead>
+              <tbody id="attendanceTableBody">
+                <tr>
+                  <td colspan="5" class="empty-state">Memuat log presensi...</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </section>
+      </div>
+    </div>
+  </main>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container"></div>
+
+  <script src="/js/app.js"></script>
+</body>
+</html>
